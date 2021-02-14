@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Alert, Button, Badge } from "react-bootstrap";
+import { ToastContainer, toast } from 'react-toastify';
 
 import Persons from "./components/person/Persons";
 
@@ -34,6 +35,15 @@ class App extends Component {
     let filteredPersons = newPersons.filter((p) => p.id !== id);
 
     this.setState({ persons: filteredPersons });
+
+    let person = newPersons.find(p => p.id == id);
+
+    // add Toast
+    toast.error(`${person.fullname} با موفقیت حذف شد.`,{
+      position: 'top-right',
+      closeButton: true,
+      closeOnClick: true
+    });
   };
 
   handleNewPerson = () => {
@@ -47,6 +57,14 @@ class App extends Component {
     if (this.state.personName == "" || this.state.personName == " ") return;
 
     persons.push(person);
+
+    // add Toast :)
+    toast.success(`${this.state.personName} با موفقیت اضافه شد.`,{
+      position: 'bottom-right',
+      closeButton: true,
+      closeOnClick: true
+    });
+
     this.setState({ persons, personName: "" });
   };
 
@@ -127,6 +145,8 @@ class App extends Component {
         </Button>
 
         {person}
+
+        <ToastContainer />
       </div>
     );
   }
