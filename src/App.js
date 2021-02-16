@@ -1,12 +1,16 @@
 import React, { Component } from "react";
 import { Alert, Button, Badge } from "react-bootstrap";
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer, toast } from "react-toastify";
 
+import SimpleContext from "./context/SimpleContext";
 import Persons from "./components/person/Persons";
+import Header from "./components/common/Header";
+import EnterName from './components/person/EnterName';
 
 class App extends Component {
   state = {
     persons: [],
+    title: "مدیریت کننده اشخاص",
     personName: "",
     showPersons: true,
   };
@@ -22,7 +26,6 @@ class App extends Component {
     const person = allPersons[personIndex];
     console.log(person);
     person.fullname = event.target.value;
-    // allPersons[personIndex] = person;
 
     const persons = [...allPersons];
     persons[personIndex] = person;
@@ -36,13 +39,12 @@ class App extends Component {
 
     this.setState({ persons: filteredPersons });
 
-    let person = newPersons.find(p => p.id == id);
+    let person = newPersons.find((p) => p.id == id);
 
-    // add Toast
-    toast.error(`${person.fullname} با موفقیت حذف شد.`,{
-      position: 'top-right',
+    toast.error(`${person.fullname} با موفقیت حذف شد.`, {
+      position: "top-right",
       closeButton: true,
-      closeOnClick: true
+      closeOnClick: true,
     });
   };
 
@@ -54,15 +56,24 @@ class App extends Component {
       fullname: this.state.personName,
     };
 
-    if (this.state.personName == "" || this.state.personName == " ") return;
+    if (
+      this.state.personName == "" ||
+      this.state.personName.split("", 1) == " "
+    ) {
+      toast.dark(`فیلد نام خالی است یا ابتدای آن فاصله تایپ شده است.`, {
+        position: "top-center",
+        closeButton: true,
+        closeOnClick: true,
+      });
+      return;
+    }
 
     persons.push(person);
 
-    // add Toast :)
-    toast.success(`${this.state.personName} با موفقیت اضافه شد.`,{
-      position: 'bottom-right',
+    toast.success(`${this.state.personName} با موفقیت اضافه شد.`, {
+      position: "bottom-right",
       closeButton: true,
-      closeOnClick: true
+      closeOnClick: true,
     });
 
     this.setState({ persons, personName: "" });
@@ -76,11 +87,6 @@ class App extends Component {
     const { persons, showPersons } = this.state;
 
     let person = null;
-    let badgeStyle = null;
-
-    if (persons.length <= 1) badgeStyle = "danger";
-    else if (persons.length == 2) badgeStyle = "warning";
-    else if (persons.length >= 3) badgeStyle = "success";
 
     if (showPersons) {
       person = (
@@ -93,61 +99,23 @@ class App extends Component {
     }
 
     return (
-      <div className="rtl text-center">
-        <Alert variant="primary">
-          <h2>برنامه مدیریت اشخاص</h2>
-        </Alert>
-
-        <Alert variant="light">
-          <h6>
-            تعداد اشخاص ثبت شده{" "}
-            <Badge variant={badgeStyle} pill className="pt-1">
-              {persons.length}
-            </Badge>{" "}
-            نفر می باشد
-          </h6>
-        </Alert>
-
-        <div>
-          <form
-            className="form-inline justify-content-center"
-            onSubmit={(event) => event.preventDefault()}
+      <SimpleContext.Provider value={{state: this.state, handleShowPersons: this.handleShowPersons, handleNameChange: this.handleNameChange, handleDeletePerson: this.handleDeletePerson, handleNewPerson: this.handleNewPerson, setPerson: this.setPerson}}>
+        <div className="rtl text-center">
+          <Header />
+          <EnterName />
+          <Button
+            onClick={this.handleShowPersons}
+            variant={showPersons ? "warning" : "info"}
+            className="m-4"
           >
-            <div className="input-group">
-              <input
-                type="text"
-                placeholder="اسم بهم بده"
-                className="form-control"
-                onChange={this.setPerson}
-                value={this.state.personName}
-                autoFocus
-                maxLength="25"
-              />
-              <div className="input-group-prepend">
-                <Button
-                  variant="success"
-                  size="sm"
-                  type="submit"
-                  className="fa fa-plus-square"
-                  onClick={this.handleNewPerson}
-                ></Button>
-              </div>
-            </div>
-          </form>
+            {showPersons ? "پنهان کردن اشخاص " : "نمایش دادن اشخاص"}
+          </Button>
+          
+          {person}
+
+          <ToastContainer />
         </div>
-
-        <Button
-          onClick={this.handleShowPersons}
-          variant={showPersons ? "warning" : "info"}
-          className="m-4"
-        >
-          {showPersons ? "پنهان کردن اشخاص " : "نمایش دادن اشخاص"}
-        </Button>
-
-        {person}
-
-        <ToastContainer />
-      </div>
+      </SimpleContext.Provider>
     );
   }
 }
